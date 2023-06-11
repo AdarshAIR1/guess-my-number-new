@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess My Number</title>
+  <style>
+    /* CSS code for your game */
+
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('bgimg.jpg');
+      background-size: cover;
+      background-position: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .game-container {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    p {
+      color: #777;
+      margin-top: 10px;
+    }
+
+    input[type="number"] {
+      padding: 5px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 200px;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 8px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #message {
+      font-weight: bold;
+    }
+
+    #score {
+      margin-top: 10px;
+    }
+
+    #timer {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .game-over-animation {
+      animation: gameOverAnimation 0.5s;
+    }
+
+    @keyframes gameOverAnimation {
+      0% {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      50% {
+        transform: translateY(20px);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Levels button styles */
+
+    /* .levels-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    } */
+    .levels-button {
+  margin-top: 20px;
+}
+
+.play-again-button {
+  margin-top: 20px;
+  margin-left: 10px;
+}
+.game-title {
+  color: #333;
+  font-family: "Arial Black", sans-serif;
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.levels-button {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.levels-button button {
+  background-color: #4caf50;
+  color: white;
+  padding: 8px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.levels-button select {
+  background-color: #f44336;
+  color: white;
+  padding: 8px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Rest of the CSS code */
+
+
+
+    /* .levels-button select {
+      background-color: #f44336;
+      color: white;
+      padding: 8px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    } */
+
+    /* Play Again button styles */
+
+    /* .play-again-button {
+      margin-top: 20px;
+    } */
+
+    /* Footer styles */
+
+    /* footer {
+      margin-top: 20px;
+      color: #555;
+      font-size: 14px;
+      text-align: center;
+      background-color: #f9f9f9;
+      padding: 10px;
+    } */
+
+    footer span {
+      display: inline-block;
+      margin-left: 5px;
+      font-size: 20px;
+    }
+    footer {
+  background-color: #f8f8f8;
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border-top: 1px solid #ccc;
+}
+
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <!-- <h1>Guess My Number</h1> -->
+    <div class="game-container">
+      <h1 class="game-title">Guess My Number</h1>
+      <div class="levels-button">
+        <button onclick="showLevelSelection()">Level</button>
+        <select id="levelSelect" onchange="setTimeLimit()">
+          <option value="30" class="easy-level">Easy</option>
+          <option value="20" class="medium-level">Medium</option>
+          <option value="15" class="hard-level">Hard</option>
+        </select>
+      </div>
+      
+    </div>
+    <p>Guess a number between 1 and 100:</p>
+    <input type="number" id="guess" placeholder="Enter your guess">
+    <button onclick="checkGuess()">Guess</button>
+    <p id="message"></p>
+    <p id="score"></p>
+    <p id="timer"></p>
+    <button class="play-again-button" onclick="playAgain()">Play Again</button>
+  </div>
+
+  <footer>
+    Developed By: Just_a_Basic_coder
+    <span>&#128187;</span>
+  </footer>
+
+  <audio id="background-music" src="bg.mp3" loop></audio>
+
+  <script>
+    var randomNumber = Math.floor(Math.random() * 100) + 1;
+    var guessInput = document.getElementById("guess");
+    var messageElement = document.getElementById("message");
+    var scoreElement = document.getElementById("score");
+    var timerElement = document.getElementById("timer");
+    var levelsButton = document.querySelector(".levels-button select");
+    var playAgainButton = document.querySelector(".play-again-button");
+    var backgroundMusic = document.getElementById("background-music");
+
+    var timeLimit = parseInt(levelsButton.value);
+    var startTime;
+    var score = 0;
+
+    // Function to check the user's guess
+    function checkGuess() {
+      var guess = parseInt(guessInput.value);
+
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        messageElement.textContent = "Please enter a valid number between 1 and 100.";
+      } else {
+        if (guess === randomNumber) {
+          messageElement.textContent = "Congratulations! You guessed the correct number.";
+          messageElement.classList.add("game-over-animation");
+          guessInput.disabled = true;
+          guessInput.style.backgroundColor = "#ddd";
+          score++;
+          scoreElement.textContent = "Score: " + score;
+          playAgainButton.style.display = "block";
+          backgroundMusic.pause();
+        } else if (guess < randomNumber) {
+          messageElement.textContent = "Too low. Guess a higher number.";
+        } else if (guess > randomNumber) {
+          messageElement.textContent = "Too high. Guess a lower number.";
+        }
+      }
+
+      guessInput.value = "";
+      guessInput.focus();
+    }
+
+    // Function to set the time limit based on the selected level
+    function setTimeLimit() {
+      timeLimit = parseInt(levelsButton.value);
+      playAgain();
+    }
+
+    // Function to update the timer
+    function updateTimer() {
+      var currentTime = Date.now();
+      var elapsedTimeInSeconds = Math.floor((currentTime - startTime) / 1000);
+      var remainingTimeInSeconds = timeLimit - elapsedTimeInSeconds;
+
+      if (remainingTimeInSeconds <= 0) {
+        messageElement.textContent = "Time's up! The number was " + randomNumber + ".";
+        messageElement.classList.add("game-over-animation");
+        guessInput.disabled = true;
+        guessInput.style.backgroundColor = "#ddd";
+        scoreElement.textContent = "Score: " + score;
+        timerElement.textContent = "Time: " + timeLimit + "s";
+        playAgainButton.style.display = "block";
+        backgroundMusic.pause();
+      } else {
+        timerElement.textContent = "Time: " + remainingTimeInSeconds + "s";
+        setTimeout(updateTimer, 1000);
+      }
+    }
+
+    // Function to start the game
+    function startGame() {
+      randomNumber = Math.floor(Math.random() * 100) + 1;
+      guessInput.disabled = false;
+      guessInput.style.backgroundColor = "#fff";
+      messageElement.textContent = "";
+      scoreElement.textContent = "";
+      startTime = Date.now();
+      updateTimer();
+      backgroundMusic.play();
+    }
+
+    // Function to play again
+    function playAgain() {
+      playAgainButton.style.display = "none";
+      startGame();
+    }
+
+    // Initial game start
+    startGame();
+  </script>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
